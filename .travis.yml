@@ -1,0 +1,22 @@
+sudo: required
+services: 
+  - docker
+
+before_install: 
+  - docker build -t thenullone/react-test -f ./client/Dockerfile.dev ./client
+
+script: 
+  - docker run thenullone/react-test npm test -- --coverage
+
+after_success: 
+  - docker build -t thenullone/multi-client ./client
+  - docker build -t thenullone/multi-server ./server
+  - docker build -t thenullone/multi-worker ./worker
+  - docker build -t thenullone/multi-nginx ./nginx
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  - docker push thenullone/multi-client
+  - docker push thenullone/multi-server
+  - docker push thenullone/multi-worker
+  - docker push thenullone/multi-nginx
+
+  
